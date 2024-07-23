@@ -4,8 +4,8 @@ import (
 	"bytes"
 	_ "embed"
 	"os"
+	"slices"
 
-	tte "github.com/zurvan-lab/TimeTrace/utils/errors"
 	"gopkg.in/yaml.v2"
 )
 
@@ -25,12 +25,14 @@ type Server struct {
 }
 
 type Log struct {
-	Path       string `yaml:"path"`
-	Colorful   bool   `yaml:"colorful"`
-	Compress   bool   `yaml:"compress"`
-	MaxAge     int    `yaml:"max_age"`
-	MaxBackups int    `yaml:"max_backups"`
-	MaxLogSize int    `yaml:"max_log_size"`
+	Path       string   `yaml:"path"`
+	Targets    []string `yaml:"targets"`
+	Level      string   `yaml:"level"`
+	Colorful   bool     `yaml:"colorful"`
+	Compress   bool     `yaml:"compress"`
+	MaxAge     int      `yaml:"max_age"`
+	MaxBackups int      `yaml:"max_backups"`
+	MaxLogSize int      `yaml:"max_log_size"`
 }
 
 type User struct {
@@ -41,7 +43,9 @@ type User struct {
 
 func (conf *Config) BasicCheck() error {
 	if len(conf.Users) == 0 {
-		return tte.ErrInvalidUsers
+		return BasicCheckError{
+			reason: "at least one user must be defined in config",
+		}
 	}
 
 	for _, u := range conf.Users {
@@ -54,7 +58,10 @@ func (conf *Config) BasicCheck() error {
 		}
 
 		if allCmds && len(u.Cmds) > 1 {
-			return tte.ErrSpecificAndAllCommandSameAtTime
+			return BasicCheckError{
+				reason: "you can't use all (*) commands and specific commands" +
+					" permission for one user at the same time",
+			}
 		}
 	}
 
@@ -68,6 +75,8 @@ func DefaultConfig() *Config {
 			Port: "7070",
 		},
 		Log: Log{
+			Targets:    []string{"file", "console"},
+			Level:      "debug",
 			Colorful:   true,
 			Compress:   true,
 			MaxAge:     1,
@@ -122,4 +131,12 @@ func (conf *Config) ToYAML() ([]byte, error) {
 	}
 
 	return buf.Bytes(), nil
+}
+
+func (u *User) HasAccess(c string) bool {
+	if u.Cmds[0] == "*" {
+		return true
+	}
+
+	return slices.Contains(u.Cmds, c)
 }

@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/zurvan-lab/TimeTrace/config"
+	"github.com/zurvan-lab/timetrace/config"
 )
 
 type Database struct {
@@ -38,7 +38,7 @@ func (db *Database) Connect(args []string) string {
 
 	for _, u := range db.Config.Users {
 		if u.Name == args[0] && u.Password == args[1] {
-			return DONE
+			return OK
 		}
 	}
 
@@ -59,7 +59,7 @@ func (db *Database) AddSet(args []string) string {
 
 	db.Sets[args[0]] = make(Set) // args[0] is set name. see: TQL docs.
 
-	return DONE
+	return OK
 }
 
 func (db *Database) AddSubSet(args []string) string {
@@ -77,7 +77,7 @@ func (db *Database) AddSubSet(args []string) string {
 
 	s[args[1]] = make(SubSet, 0) // subset name args[1]
 
-	return DONE
+	return OK
 }
 
 func (db *Database) PushElement(args []string) string {
@@ -108,7 +108,7 @@ func (db *Database) PushElement(args []string) string {
 
 	db.Sets[setName][subSetName] = append(db.Sets[setName][subSetName], e)
 
-	return DONE
+	return OK
 }
 
 func (db *Database) DropSet(args []string) string {
@@ -128,7 +128,7 @@ func (db *Database) DropSet(args []string) string {
 
 	delete(db.Sets, setName)
 
-	return DONE
+	return OK
 }
 
 func (db *Database) DropSubSet(args []string) string {
@@ -149,7 +149,7 @@ func (db *Database) DropSubSet(args []string) string {
 
 	delete(db.Sets[setName], subSetName)
 
-	return DONE
+	return OK
 }
 
 func (db *Database) CleanSets(_ []string) string {
@@ -158,7 +158,7 @@ func (db *Database) CleanSets(_ []string) string {
 
 	db.Sets = make(Sets)
 
-	return DONE
+	return OK
 }
 
 func (db *Database) CleanSet(args []string) string {
@@ -178,7 +178,7 @@ func (db *Database) CleanSet(args []string) string {
 
 	db.Sets[setName] = make(Set)
 
-	return DONE
+	return OK
 }
 
 func (db *Database) CleanSubSet(args []string) string {
@@ -199,19 +199,14 @@ func (db *Database) CleanSubSet(args []string) string {
 
 	db.Sets[setName][subSetName] = make(SubSet, 0)
 
-	return DONE
+	return OK
 }
 
 func (db *Database) CountSets(_ []string) string {
 	db.RLock()
 	defer db.RUnlock()
 
-	i := 0
-	for range db.Sets {
-		i++
-	}
-
-	return fmt.Sprint(i)
+	return fmt.Sprint(len(db.Sets))
 }
 
 func (db *Database) CountSubSets(args []string) string {
@@ -222,17 +217,12 @@ func (db *Database) CountSubSets(args []string) string {
 		return INVALID
 	}
 
-	set, ok := db.Sets[args[0]]
+	subSet, ok := db.Sets[args[0]]
 	if !ok {
 		return SET_NOT_FOUND
 	}
 
-	i := 0
-	for range set {
-		i++
-	}
-
-	return fmt.Sprint(i)
+	return fmt.Sprint(len(subSet))
 }
 
 func (db *Database) CountElements(args []string) string {
@@ -243,17 +233,12 @@ func (db *Database) CountElements(args []string) string {
 		return INVALID
 	}
 
-	subSet, ok := db.Sets[args[0]][args[1]]
+	elms, ok := db.Sets[args[0]][args[1]]
 	if !ok {
 		return SUB_SET_NOT_FOUND
 	}
 
-	i := 0
-	for range subSet {
-		i++
-	}
-
-	return fmt.Sprint(i)
+	return fmt.Sprint(len(elms))
 }
 
 func (db *Database) GetElements(args []string) string {

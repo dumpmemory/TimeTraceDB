@@ -18,7 +18,7 @@ Time trace is using a query language called TQL. Here is documentation and speci
 | CNTS * | returns count of sets |  |
 | CNTSS * | returns count of subsets | set-name |
 | CNTE * | returns count of elements | set-name - subset-name |
-| CLN * | cleans all database sets (the sets themselves) | set-name - subset-name |
+| CLN * | cleans all database sets (the sets themselves) | |
 | CLNS * | cleans all sub-sets of a set | set-name |
 | CLNSS * | cleans all elements of a subset | set-name - subset-name |
 | DRPS * | drops a set | set-name |
@@ -30,9 +30,22 @@ Time trace is using a query language called TQL. Here is documentation and speci
 
 | Message   |      reason      | 
 |----------|:-------------|
-| DONE | everything is ok |
+| OK | everything is OK |
 | INVALID | invalid user and password to make a connection OR not enough args for a command |
 | SNF | set is not found |
 | SSNF | subset is not found |
 | ENF | element(s) is not found |
 | [DATA separated by space] (key-time key-time key-time) | GET successful response |
+
+
+# Example
+
+Here is a set of examples to understand TQL and idea behind it:
+
+E1:
+```
+SET  myset
+SSET myset mysset
+PUSH myset mysset hello 123456789
+GET  myset mysset 1
+```

@@ -1,50 +1,21 @@
 package timetracedb
 
-import (
-	"encoding/json"
-	"encoding/xml"
-	"fmt"
-)
+import "fmt"
 
 // These constants follow the semantic versioning 2.0.0 spec (http://semver.org/)
-type Version struct {
-	Meta  string `json:"meta"  xml:"meta"`
-	Major uint8  `json:"major" xml:"major"`
-	Minor uint8  `json:"minor" xml:"minor"`
-	Patch uint8  `json:"patch" xml:"patch"`
-}
-
-var version = Version{
-	Major: 0,
-	Minor: 1,
-	Patch: 0,
-	Meta:  "beta",
-}
+var (
+	major = 0
+	minor = 1
+	patch = 0
+	meta  = "beta"
+)
 
 func StringVersion() string {
-	v := fmt.Sprintf("%d.%d.%d", version.Major, version.Minor, version.Patch)
+	v := fmt.Sprintf("%d.%d.%d", major, minor, patch)
 
-	if version.Meta != "" {
-		v = fmt.Sprintf("%s-%s", v, version.Meta)
+	if meta != "" {
+		v = fmt.Sprintf("%s-%s", v, meta)
 	}
 
 	return v
-}
-
-func JSONVersion() (string, error) {
-	v, err := json.Marshal(version)
-	if err != nil {
-		return "", err
-	}
-
-	return string(v), nil
-}
-
-func XMLVersion() (string, error) {
-	v, err := xml.MarshalIndent(version, "", " ")
-	if err != nil {
-		return "", err
-	}
-
-	return string(v), nil
 }

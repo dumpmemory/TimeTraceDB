@@ -1,6 +1,6 @@
 package execute
 
-import "github.com/zurvan-lab/TimeTrace/core/database"
+import "github.com/zurvan-lab/timetrace/core/database"
 
 type Executor func(database.IDataBase, []string) string
 
@@ -26,7 +26,7 @@ var Executors ExecutorMap = ExecutorMap{
 func Execute(q database.Query, db database.IDataBase) string {
 	execute, ok := Executors[q.Command]
 	if !ok {
-		return "INVALID"
+		return database.INVALID
 	}
 
 	result := execute(db, q.Args)
